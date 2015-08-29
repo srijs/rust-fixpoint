@@ -13,25 +13,21 @@ impl<A> Fix<A> {
     }
 }
 
-pub fn fix<A, F: FnMut(A) -> Fix<A>>(a: A, f: F) -> A {
-    let mut current = a;
-    let mut g = f;
+pub fn fix<A, F: FnMut(A) -> Fix<A>>(mut a: A, mut f: F) -> A {
     loop {
-        match g(current) {
-            Fix::Fix(a) => return a,
-            Fix::Pro(a) => current = a
+        match f(a) {
+            Fix::Fix(b) => return b,
+            Fix::Pro(b) => a = b
         }
     }
 }
 
-pub fn fix_result<A, E, F: FnMut(A) -> Result<Fix<A>, E>>(a: A, f: F) -> Result<A, E> {
-    let mut current = a;
-    let mut g = f;
+pub fn fix_result<A, E, F: FnMut(A) -> Result<Fix<A>, E>>(mut a: A, mut f: F) -> Result<A, E> {
     loop {
-        match g(current) {
+        match f(a) {
             Result::Err(err) => return Result::Err(err),
-            Result::Ok(Fix::Fix(a)) => return Result::Ok(a),
-            Result::Ok(Fix::Pro(a)) => current = a
+            Result::Ok(Fix::Fix(b)) => return Result::Ok(b),
+            Result::Ok(Fix::Pro(b)) => a = b
         }
     }
 }
