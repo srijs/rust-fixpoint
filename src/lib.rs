@@ -13,6 +13,14 @@ impl<A> Fix<A> {
     }
 }
 
+pub fn compose<A, F, G>(a: A, mut f: F, mut g: G) -> Fix<A>
+    where F: FnMut(A) -> Fix<A>, G: FnMut(A) -> Fix<A> {
+    match f(a) {
+        Fix::Fix(b) => g(b),
+        fix => fix
+    }
+}
+
 pub fn fix<A, F: FnMut(A) -> Fix<A>>(mut a: A, mut f: F) -> A {
     loop {
         match f(a) {
